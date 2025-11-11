@@ -1,0 +1,1 @@
+{"num_cols": ["_total_funding_usd", "_last_round_amount_usd", "_num_rounds", "_num_investors", "_num_articles", "_employees", "_cb_rank", "_days_since_last_round"], "cat_cols": ["_sector", "_location"], "text_cols": []}

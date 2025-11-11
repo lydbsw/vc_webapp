@@ -1,0 +1,1 @@
+{"num_cols": ["_total_funding_usd", "_num_rounds", "_num_investors"], "cat_cols": ["_sector"], "text_col": null}
