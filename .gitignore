@@ -1,0 +1,23 @@
+# Node and editor
+node_modules/
+client/node_modules/
+client/client_backup/node_modules/
+server/node_modules/
+client/.cache/
+
+# Build / artifacts
+outputs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Environment
+.env
+
+# VS Code
+.vscode/
+
+# Lock files (optional)
+client/package-lock.json
