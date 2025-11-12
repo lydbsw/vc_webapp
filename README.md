@@ -1,6 +1,5 @@
 
 # VC Analyzer — React (client) + Express (server)
-Structure mirrors `client/` and `server/` like the Northeastern-Superstore repo.
 
 ## Quick start
 1) Train the model via `model_utils.py` (writes `models/nb_model.pkl`)
