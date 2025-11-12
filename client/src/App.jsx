@@ -39,7 +39,7 @@ export default function App() {
   return (
     <div style={{color:'#969696ff', background:'#0b0c10', minHeight:'100vh', fontFamily:'ui-sans-serif, system-ui'}}>
       <header style={{padding:'24px 20px', borderBottom:'1px solid #222'}}>
-        <h2 style={{margin:0}}>VC Analyzer — Upload & Score</h2>
+        <h2 style={{margin:0}}>Capital Compass</h2>
         <p style={{margin:0, color:'#ffffffff'}}>{status}</p>
       </header>
 
