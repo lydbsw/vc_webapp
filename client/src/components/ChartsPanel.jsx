@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bar, Scatter, Bubble, Chart } from 'react-chartjs-2';
 import ChartJS from '../chart/setup';
+import './ChartsPanel.css';
 
 function buildTopkData(res) {
   if (!res?.topk) return null;
@@ -33,24 +34,24 @@ export default function ChartsPanel({ res }) {
   const scatterData = res?.scatter ? { datasets: [{ label: 'Amount vs Score', data: res.scatter.x.map((x,i)=>({x, y: res.scatter.y[i]})), pointRadius: 2 }] } : null;
 
   return (
-    <section style={{display:'grid', gap:16, gridTemplateColumns:'repeat(2, minmax(0,1fr))', padding:'16px 20px'}}>
-      <div style={{background:'#ffffffff', padding:14, borderRadius:12}}>
+    <section className="charts-panel-root">
+      <div className="chart-card">
         <h4>Score Distribution</h4>
         {histData ? <Bar data={histData} /> : <div>No data</div>}
       </div>
-      <div style={{background:'#ffffffff', padding:14, borderRadius:12}}>
+      <div className="chart-card">
         <h4>Top 20 (score vs funding)</h4>
         {topkData ? (
           <Bubble data={topkData} options={{ scales: { x: { title: { display: true, text: 'Score' }, min: 0, max: 1 }, y: { title: { display: true, text: 'Last round amount (USD)' }, type: 'logarithmic' } }, plugins: { tooltip: { callbacks: { label: (ctx) => { const d = ctx.raw || {}; return `${d.x?.toFixed(3) || ''} — $${(d.y || 0).toLocaleString()}`; } } }, legend: { display: false } } }} />
         ) : <div>No data</div>}
       </div>
-      <div style={{background:'#ffffffff', padding:14, borderRadius:12}}>
+      <div className="chart-card">
         <h4>Companies by sector</h4>
         {sectorTreeData ? (
           <Chart type="treemap" data={sectorTreeData} options={{ plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => { const v = ctx.dataset?.tree?.[ctx.dataIndex]?.v ?? ctx.raw?.v ?? ctx.parsed?.v; const n = ctx.dataset?.tree?.[ctx.dataIndex]?.name ?? ctx.label; return `${n}: ${v}`; } } } } }} />
         ) : <div>No data</div>}
       </div>
-      <div style={{background:'#ffffffff', padding:14, borderRadius:12}}>
+      <div className="chart-card">
         <h4>Score vs last round amount</h4>
         {scatterData ? <Scatter data={scatterData} options={{scales:{x:{type:'logarithmic'}}}} /> : <div>No data</div>}
       </div>

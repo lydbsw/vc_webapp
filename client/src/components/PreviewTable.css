@@ -1,0 +1,7 @@
+.preview-root{flex:1;min-width:0;background:#0b0c10;padding:0;max-height:60vh;overflow-y:auto}
+.preview-table-wrap{overflow-x:auto}
+.preview-table{width:100%;border-collapse:collapse}
+.preview-th{text-align:left;border-bottom:1px solid #222;padding:8px}
+.preview-td{border-bottom:1px solid #222;padding:8px}
+.preview-row{cursor:pointer;background:transparent}
+.preview-row.selected{background:#0f1720}

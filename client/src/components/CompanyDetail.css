@@ -1,0 +1,10 @@
+.company-empty{background:#0f1720;padding:12px;border-radius:12px;color:#a8a8ad}
+.company-detail-root{width:380px;flex:0 0 380px}
+.company-sticky{position:sticky;top:24px}
+.company-card{background:#15171c;padding:14px;border-radius:12px}
+.company-header{display:flex;justify-content:space-between;align-items:center}
+.company-title{margin:0}
+.company-close-btn{background:transparent;border:none;color:#a8a8ad;cursor:pointer}
+.company-info{color:#a8a8ad;margin-top:8px}
+.company-metrics{margin-top:12px}
+.company-metrics h4{margin-top:0}
