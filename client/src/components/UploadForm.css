@@ -1,0 +1,15 @@
+.upload-section{padding:16px 20px;display:flex;gap:12px;align-items:center;border-bottom:1px solid #222}
+
+.analyze-btn-wrapper{position:relative;display:inline-block}
+
+.analyze-btn{background:#4da3ff;color:#000;border:none;padding:12px 20px;border-radius:10px;cursor:pointer;font-size:16px;font-weight:600;transition:transform .12s ease, box-shadow .12s ease}
+
+.analyze-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+.analyze-btn:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(77,163,255,.18)}
+
+.analyze-tooltip{position:absolute;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(0,0,0,.85);color:#fff;padding:6px 10px;border-radius:6px;font-size:13px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s ease,transform .12s ease;z-index:10}
+
+.analyze-btn-wrapper:hover .analyze-tooltip{opacity:1;transform:translateX(-50%) translateY(-10px)}
+
+.download-link{margin-left:12px;color:#4da3ff}
