@@ -34,7 +34,7 @@ app.post('/api/analyze', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).send('No file uploaded');
   const ticket = uuidv4();
   const py = spawn('python', [
-    path.join(__dirname, 'scorer.py'),
+    path.join(__dirname, 'modelProcessor.py'),
     '--input', req.file.path,
     '--outputs', OUTPUTS_DIR,
     '--models', MODELS_DIR,

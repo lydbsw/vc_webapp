@@ -872,7 +872,7 @@ def score_user_file(user_df: pd.DataFrame, stage_key: str, fallback_to_any: bool
 def score_dataframe_with_saved_model(engineered_df: pd.DataFrame, model_path: str) -> pd.DataFrame:
     """Load a saved model (joblib/pickle) and score an already-engineered dataframe.
 
-    This is a thin compatibility wrapper used by the legacy `scorer.py` which expects
+    This is a thin compatibility wrapper used by the legacy `modelProcessor.py` which expects
     a single model file named `nb_model.pkl`. The function will attempt to load the
     model with joblib and compute a `_score` column on `engineered_df`. If anything
     fails it will return the original dataframe unchanged.
