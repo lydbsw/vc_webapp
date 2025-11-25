@@ -21,6 +21,11 @@ const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
 app.use(cors({ origin: ALLOWED_ORIGIN }));
 app.use(express.json());
 
+// Friendly root route so visiting the service URL is informative
+app.get('/', (req, res) => {
+  res.send('Capital Compass server is running. Use /api/status for health checks.');
+});
+
 app.get('/api/status', (req, res) => {
   const modelPath = path.join(MODELS_DIR, 'nb_model.pkl');
   const exists = fs.existsSync(modelPath);
