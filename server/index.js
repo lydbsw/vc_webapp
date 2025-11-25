@@ -11,16 +11,16 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
+const ROOT = path.join(__dirname, '..');
+const MODELS_DIR = path.join(ROOT, 'models');
+const OUTPUTS_DIR = path.join(ROOT, 'outputs');
+
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 // Ensure uploads and outputs directories exist so multer and the scorer can write files
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 if (!fs.existsSync(OUTPUTS_DIR)) fs.mkdirSync(OUTPUTS_DIR, { recursive: true });
 
 const upload = multer({ dest: UPLOADS_DIR });
-
-const ROOT = path.join(__dirname, '..');
-const MODELS_DIR = path.join(ROOT, 'models');
-const OUTPUTS_DIR = path.join(ROOT, 'outputs');
 
 // Read ALLOWED_ORIGIN from env and normalize (strip trailing slash) so
 // values like "https://example.com/" still match the request origin.
