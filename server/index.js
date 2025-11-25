@@ -17,7 +17,12 @@ const ROOT = path.join(__dirname, '..');
 const MODELS_DIR = path.join(ROOT, 'models');
 const OUTPUTS_DIR = path.join(ROOT, 'outputs');
 
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
+// Read ALLOWED_ORIGIN from env and normalize (strip trailing slash) so
+// values like "https://example.com/" still match the request origin.
+let ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
+if (ALLOWED_ORIGIN !== '*') {
+  ALLOWED_ORIGIN = ALLOWED_ORIGIN.replace(/\/+$/, '');
+}
 app.use(cors({ origin: ALLOWED_ORIGIN }));
 app.use(express.json());
 
