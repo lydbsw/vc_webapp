@@ -46,26 +46,76 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-app.post('/api/analyze', upload.single('file'), (req, res) => {
+app.post('/api/analyze', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).send('No file uploaded');
   const ticket = uuidv4();
   // Spawn the Python scorer. Attach an error handler to catch ENOENT (binary not found)
   // so the Node process does not crash with an unhandled exception.
-  const py = spawn('python', [
+  // Try multiple python executables (common names/paths) so deployments where
+  // `python` isn't present can still run with `python3`.
+  const scorerArgs = [
     path.join(__dirname, 'modelProcessor.py'),
     '--input', req.file.path,
     '--outputs', OUTPUTS_DIR,
     '--models', MODELS_DIR,
     '--ticket', ticket
-  ], { cwd: ROOT });
+  ];
+
+  function spawnWithFallback(execs, args, opts) {
+    return new Promise((resolve, reject) => {
+      let idx = 0;
+      const tried = [];
+      function tryNext() {
+        if (idx >= execs.length) return reject(new Error('No python executable found. Tried: ' + tried.join(', ')));
+        const exe = execs[idx++];
+        tried.push(exe);
+        let p;
+        try {
+          p = spawn(exe, args, opts);
+        } catch (e) {
+          // unlikely, but try next
+          return setImmediate(tryNext);
+        }
+        let errored = false;
+        const onError = (e) => {
+          errored = true;
+          p.removeAllListeners();
+          // try next executable
+          setImmediate(tryNext);
+        };
+        p.once('error', onError);
+        // if no immediate error after a short tick, assume spawn succeeded
+        setTimeout(() => {
+          if (!errored) {
+            p.removeListener('error', onError);
+            return resolve({ p, exe });
+          }
+        }, 50);
+      }
+      tryNext();
+    });
+  }
+
+  const pythonCandidates = ['python', 'python3', '/usr/bin/python3'];
+  let py;
+  try {
+    const spawnResult = await spawnWithFallback(pythonCandidates, scorerArgs, { cwd: ROOT });
+    py = spawnResult.p;
+    console.log('[server] Spawned scorer using executable:', spawnResult.exe);
+  } catch (e) {
+    fs.unlink(req.file.path, () => {});
+    console.error('[server] No python executable found:', e && e.message ? e.message : e);
+    return res.status(500).send('No python executable found on the server. Please ensure Python is installed.');
+  }
 
   let out = '', err = '';
-  py.stdout.on('data', d => out += d.toString());
-  py.stderr.on('data', d => err += d.toString());
+  py.stdout.on('data', d => { const s = d.toString(); out += s; console.log('[scorer stdout]', s); });
+  py.stderr.on('data', d => { const s = d.toString(); err += s; console.error('[scorer stderr]', s); });
+
   py.on('error', (e) => {
     // Clean up uploaded file
     fs.unlink(req.file.path, () => {});
-    console.error('[server] Failed to start Python scorer:', e && e.stack ? e.stack : e);
+    console.error('[server] Failed to start Python scorer (late error):', e && e.stack ? e.stack : e);
     if (!res.headersSent) {
       return res.status(500).send('Failed to start Python scorer: ' + (e && e.message ? e.message : String(e)));
     }
