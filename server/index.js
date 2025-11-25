@@ -11,7 +11,12 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
-const upload = multer({ dest: path.join(__dirname, 'uploads') });
+const UPLOADS_DIR = path.join(__dirname, 'uploads');
+// Ensure uploads and outputs directories exist so multer and the scorer can write files
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+if (!fs.existsSync(OUTPUTS_DIR)) fs.mkdirSync(OUTPUTS_DIR, { recursive: true });
+
+const upload = multer({ dest: UPLOADS_DIR });
 
 const ROOT = path.join(__dirname, '..');
 const MODELS_DIR = path.join(ROOT, 'models');
@@ -44,6 +49,8 @@ app.get('/api/status', (req, res) => {
 app.post('/api/analyze', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).send('No file uploaded');
   const ticket = uuidv4();
+  // Spawn the Python scorer. Attach an error handler to catch ENOENT (binary not found)
+  // so the Node process does not crash with an unhandled exception.
   const py = spawn('python', [
     path.join(__dirname, 'modelProcessor.py'),
     '--input', req.file.path,
@@ -55,9 +62,30 @@ app.post('/api/analyze', upload.single('file'), (req, res) => {
   let out = '', err = '';
   py.stdout.on('data', d => out += d.toString());
   py.stderr.on('data', d => err += d.toString());
+  py.on('error', (e) => {
+    // Clean up uploaded file
+    fs.unlink(req.file.path, () => {});
+    console.error('[server] Failed to start Python scorer:', e && e.stack ? e.stack : e);
+    if (!res.headersSent) {
+      return res.status(500).send('Failed to start Python scorer: ' + (e && e.message ? e.message : String(e)));
+    }
+  });
+
+  // If the scorer takes too long, kill it and return an error rather than leaving the request hanging.
+  const SCORER_TIMEOUT_MS = Number(process.env.SCORER_TIMEOUT_MS || 120000); // default 2 minutes
+  const killTimer = setTimeout(() => {
+    try { py.kill('SIGKILL'); } catch (e) {}
+    console.error('[server] Scorer timed out and was killed');
+    if (!res.headersSent) {
+      fs.unlink(req.file.path, () => {});
+      return res.status(500).send('Scorer timed out');
+    }
+  }, SCORER_TIMEOUT_MS);
   py.on('close', (code) => {
+    clearTimeout(killTimer);
     fs.unlink(req.file.path, () => {}); // cleanup
     if (code !== 0) {
+      console.error('[server] Scorer exited with code', code, 'STDOUT:', out, 'STDERR:', err);
       return res.status(500).send(err || 'Python scorer failed');
     }
     try {
@@ -77,6 +105,7 @@ app.post('/api/analyze', upload.single('file'), (req, res) => {
           return res.status(500).send('Failed to parse scorer output (recovery failed): ' + e2.message + '\n' + out + '\nSTDERR:\n' + err);
         }
       }
+      console.error('[server] Failed to parse scorer output:', e, 'STDOUT:', out, 'STDERR:', err);
       return res.status(500).send('Failed to parse scorer output: ' + e.message + '\n' + out + '\nSTDERR:\n' + err);
     }
   });
