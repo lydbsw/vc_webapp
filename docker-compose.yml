@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    image: vc-server:latest
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+    volumes:
+      - ./models:/app/models
+      - ./outputs:/app/outputs
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: vc-client:latest
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_BASE=http://localhost:5001
+    restart: unless-stopped
+
+# Usage:
+# 1) Build and start both services: `docker-compose up --build`
+# 2) Visit client at http://localhost:3000 and server at http://localhost:5001/api/status

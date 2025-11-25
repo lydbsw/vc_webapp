@@ -17,7 +17,8 @@ const ROOT = path.join(__dirname, '..');
 const MODELS_DIR = path.join(ROOT, 'models');
 const OUTPUTS_DIR = path.join(ROOT, 'outputs');
 
-app.use(cors());
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
+app.use(cors({ origin: ALLOWED_ORIGIN }));
 app.use(express.json());
 
 app.get('/api/status', (req, res) => {
@@ -82,4 +83,5 @@ app.get('/api/download/:ticket', (req, res) => {
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`[server] listening on http://localhost:${PORT}`);
+  console.log(`[server] CORS allowed origin: ${ALLOWED_ORIGIN}`);
 });
